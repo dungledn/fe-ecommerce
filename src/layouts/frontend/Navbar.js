@@ -1,7 +1,48 @@
+import axios from "axios";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import swal from "sweetalert";
 
 function Navbar() {
+    
+    const history = useHistory();
+
+    function logoutSubmit(e)
+    {
+        e.preventDefault();
+
+        axios.post(`/api/logout`)
+            .then(res => {
+                if (res.data.status === 200) {
+                    localStorage.removeItem('auth_token', res.data.token)
+                    localStorage.removeItem('auth_name', res.data.name)
+                    swal('Success', res.data.message, 'success');
+                    history.push('/');
+                }
+            })
+    }
+
+    var AuthButton = '';
+
+    if (!localStorage.getItem('auth_token')) {
+        AuthButton = (
+            <ul className="navbar-nav">
+                <li className="nav-item">
+                    <Link className="nav-link" to="/login">Login</Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link" to="/register">Register</Link>
+                </li>
+            </ul>
+        );
+    } else {
+        AuthButton = (
+            <li className="nav-item">
+                <Link className="nav-link btn btn-danger" onClick={logoutSubmit} to="/logout">Logout</Link>
+            </li>
+        )
+    }
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow sticky-top">
             <div className="container">
@@ -19,12 +60,7 @@ function Navbar() {
                         <li className="nav-item">
                             <Link className="nav-link" to="#">Collection</Link>
                         </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/login">Login</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className="nav-link" to="/register">Register</Link>
-                        </li>
+                        { AuthButton }                   
                     </ul>
 
                 </div>
